@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Products } from "./Products";
 import { ProductResponse } from "./products.api";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { server } from "../mocks/node";
 
 describe("Products", () => {
@@ -42,5 +42,36 @@ describe("Products", () => {
     expect(screen.getByText("100")).toBeInTheDocument();
     expect(screen.getByText("Product 2")).toBeInTheDocument();
     expect(screen.getByText("200")).toBeInTheDocument();
+  });
+
+  it("should display loading state", async () => {
+    // Given
+    server.use(
+      http.get("https://dummyjson.com/products", async () => {
+        await delay("infinite");
+        return new HttpResponse();
+      })
+    );
+
+    // When
+    render(<Products />);
+
+    // Then
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+  });
+
+  it("should display error state", async () => {
+    // Given
+    server.use(
+      http.get("https://dummyjson.com/products", () => {
+        return HttpResponse.json("An error occurred", { status: 404 });
+      })
+    );
+
+    // When
+    render(<Products />);
+
+    // Then
+    expect(await screen.findByText("Error")).toBeInTheDocument;
   });
 });
