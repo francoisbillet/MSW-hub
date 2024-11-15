@@ -1,14 +1,36 @@
 import { render, screen } from "@testing-library/react";
 import { Products } from "./Products";
+import { ProductResponse } from "./products.api";
+import { http, HttpResponse } from "msw";
 import { server } from "../mocks/node";
-import { handlers } from "../mocks/handlers";
 
 describe("Products", () => {
-  beforeEach(() => {
-    server.resetHandlers(...handlers);
-  });
-
   it("should render 2 products", async () => {
+    // Given
+    const productsResponse: ProductResponse = {
+      products: [
+        {
+          id: "1",
+          title: "Product 1",
+          price: 100,
+        },
+        {
+          id: "2",
+          title: "Product 2",
+          price: 200,
+        },
+      ],
+      limit: 10,
+      skip: 0,
+      total: 2,
+    };
+
+    server.use(
+      http.get("https://dummyjson.com/products", () => {
+        return HttpResponse.json(productsResponse);
+      })
+    );
+
     // When
     render(<Products />);
 
