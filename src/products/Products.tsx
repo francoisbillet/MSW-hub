@@ -12,14 +12,16 @@ export const Products = () => {
   }
 
   return (
-    <div>
-      <h1>Products</h1>
-      {products.map((product) => (
-        <div key={product.id}>
-          <h2>{product.title}</h2>
-          <p>{product.price}</p>
-        </div>
-      ))}
+    <div className="h-screen w-screen flex flex-col gap-2">
+      <h1 className="text-center">Products</h1>
+      <div className="flex flex-col gap-3 pl-4">
+        {products.map((product) => (
+          <div key={product.id}>
+            <h2>{product.title}</h2>
+            <p>{product.price}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
