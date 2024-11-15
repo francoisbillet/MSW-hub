@@ -92,11 +92,22 @@ describe("Products", () => {
       skip: 0,
       total: 1,
     };
-    let productWasUpdated = false;
 
+    let count = 0;
     server.use(
       http.get("https://dummyjson.com/products", () => {
-        return HttpResponse.json(productResponse);
+        if (count === 0) {
+          count++;
+          return HttpResponse.json(productResponse);
+        }
+        return HttpResponse.json({
+          ...productResponse,
+          products: productResponse.products.map((product) =>
+            product.id === "1"
+              ? { ...product, title: "Updated Product 1 title" }
+              : product
+          ),
+        });
       }),
 
       http.put<
@@ -110,15 +121,14 @@ describe("Products", () => {
           const body = await request.json();
 
           if (productId === "1" && body.title === "Updated Product 1 title") {
-            productWasUpdated = true;
+            return HttpResponse.json({
+              ...productResponse,
+              products: productResponse.products.map((product) =>
+                product.id === "1" ? { ...product, title: body.title } : product
+              ),
+            });
           }
-
-          return HttpResponse.json({
-            ...productResponse,
-            products: productResponse.products.map((product) =>
-              product.id === "1" ? { ...product, title: body.title } : product
-            ),
-          });
+          return HttpResponse.json();
         }
       )
     );
@@ -133,6 +143,8 @@ describe("Products", () => {
     await user.click(screen.getByRole("button", { name: "Update product 1" }));
 
     // Then
-    expect(productWasUpdated).toBe(true);
+    expect(
+      await screen.findByText("Updated Product 1 title")
+    ).toBeInTheDocument();
   });
 });
