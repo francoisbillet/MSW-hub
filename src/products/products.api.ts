@@ -21,3 +21,22 @@ export async function getProducts() {
   }
   return response.json() as Promise<ProductResponse>;
 }
+
+export type UpdateProductRequestBody = {
+  title: string;
+};
+
+export async function updateProduct(
+  productId: string,
+  body: UpdateProductRequestBody
+) {
+  const response = await fetch(`https://dummyjson.com/products/${productId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw Error("there was an error");
+  }
+  return response.json() as Promise<Product>;
+}
